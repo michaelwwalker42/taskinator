@@ -2,7 +2,8 @@ var taskIdCounter = 0;
 
 var formEl = document.querySelector("#task-form");
 var tasksToDoEl =  document.querySelector("#tasks-to-do");
-
+var tasksInProgreeEl = document.querySelector("#tasks-in-progress");
+var tasksCompletedEl = document.querySelector("#tasks-completed");
 var pageContentEl = document.querySelector("#page-content");
 
 
@@ -21,13 +22,24 @@ var taskFormHandler = function(event) {                    // function to dynami
         return false;
     }
     formEl.reset();                  // reset method works specifically on form elements only
+
+    var isEdit = formEl.hasAttribute("data-task-id");
     
-    var taskDataObj = {               // package up data as an object
-        name: taskNameInput,
-        type: taskTypeInput
+    // has data attribute, so get task id and call function to complete edit process
+    if (isEdit) {
+        var taskId = formEl.getAttribute("data-task-id");
+        completeEditTask(taskNameInput, taskTypeInput, taskId);
+    }
+    // no data attribute, so create object as normal and pass to createTaskEl function
+    else {    
+        var taskDataObj = {               // package up data as an object
+         name: taskNameInput,
+         type: taskTypeInput
     };
     createTaskEl(taskDataObj);      // send it as an argument to createTaskEl
-}
+    }
+};
+
 //------------------------------------createTaskEl Function-----------------------------------------------------
 
 var createTaskEl = function(taskDataObj) {
@@ -92,7 +104,25 @@ var createTaskActions = function(taskId) {
     }
 
     return actionContainerEl;
-}
+};
+//---------------------------------------------completeEditTask function---------------------------------------
+
+var completeEditTask = function(taskName, taskType, taskId) {
+    // find the matching task list item
+    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+
+    // set new values
+    taskSelected.querySelector("h3.task-name").textContent = taskName;
+    taskSelected.querySelector("span.task-type").textContent = taskType;
+
+    alert("Task Updated!");
+
+    // remove data attribute from form
+    formEl.removeAttribute("data-task-id");
+
+    document.querySelector("#save-task").textContent = "Add Task";
+};
+//-------------------------------------------------------------------------------------------------------------
 //--------------------------------------------------taskButtonHandler function----------------------------------
 
 var taskButtonHandler = function(event) {
@@ -111,6 +141,29 @@ var taskButtonHandler = function(event) {
     }
 };
 //-------------------------------------------------------------------------------------------------------------
+
+//-----------------------------------------taskStatusChangeHandler function-------------------------------------
+var taskStatusChangeHandler = function(event) {
+    // get the task item's id
+    var taskId = event.target.getAttribute("data-task-id");
+
+    // get the currently selected option's value and convert to lowercase
+    var statusValue = event.target.value.toLowerCase();
+
+    // find the parent task item element based on the id
+    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+
+    if (statusValue ==="to do") {
+        tasksToDoEl.appendChild(taskSelected);
+    }
+    else if (statusValue === "in progress") {
+        tasksInProgreeEl.appendChild(taskSelected);
+    }
+    else if (statusValue === "completed") {
+        tasksCompletedEl.appendChild(taskSelected);
+    }
+};
+//--------------------------------------------------------------------------------------------------------------
 
 
 //----------------------------------------------------editTask function---------------------------------------
@@ -145,8 +198,10 @@ var deleteTask = function(taskId) {
 //-------------------------------------------------------------------------------------------------------------
 
 // create a new task
-formEl.addEventListener("submit", taskFormHandler);    // submit works on mouse click or enter on keyboard
-      
+formEl.addEventListener("submit", taskFormHandler);    // submit works on mouse click or enter on keyboard      
 
 // for edit and delete buttons
 pageContentEl.addEventListener("click", taskButtonHandler);
+
+// for changing status
+pageContentEl.addEventListener("change", taskStatusChangeHandler);
