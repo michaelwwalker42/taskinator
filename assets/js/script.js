@@ -72,6 +72,9 @@ var createTaskEl = function(taskDataObj) {
 
     tasks.push(taskDataObj);
 
+    // run saveTasks function to save to localStorage
+    saveTasks();
+
     // increase task counter for next unique id
     taskIdCounter++;
 
@@ -144,6 +147,9 @@ var completeEditTask = function(taskName, taskType, taskId) {
     formEl.removeAttribute("data-task-id");
 
     document.querySelector("#save-task").textContent = "Add Task";
+
+    // run saveTasks function to save to localStorage
+    saveTasks();
 };
 //-------------------------------------------------------------------------------------------------------------
 //--------------------------------------------------taskButtonHandler function----------------------------------
@@ -192,6 +198,8 @@ var taskStatusChangeHandler = function(event) {
             tasks[i].status = statusValue;
         }
     }
+    // run saveTasks function to save to localStorage
+    saveTasks();
 };
 //--------------------------------------------------------------------------------------------------------------
 
@@ -240,9 +248,19 @@ var deleteTask = function(taskId) {
 
     // reassign tasks array to be the same as updatedTaskArr
     tasks = updatedTaskArr;
+    // run saveTasks function to save to localStorage
+    saveTasks();
   };
 //-------------------------------------------------------------------------------------------------------------
 
+//------------------------------------saveTasks function------------------------------------------------------
+
+var saveTasks = function() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));      // localStorage.setItem() saves data to lacalStorage
+    // JSON stands for JavaScript Object Notation
+    // syntax for JSON     JSON.stringify(value[, replacer[, space]])
+}
+//------------------------------------------------------------------------------------------------------------
 // create a new task
 formEl.addEventListener("submit", taskFormHandler);    // submit works on mouse click or enter on keyboard      
 
